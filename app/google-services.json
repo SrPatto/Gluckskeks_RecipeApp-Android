@@ -1,0 +1,77 @@
+{
+  "project_info": {
+    "project_number": "889990981952",
+    "firebase_url": "https://saltto-recetario-guckskeks-default-rtdb.firebaseio.com",
+    "project_id": "saltto-recetario-guckskeks",
+    "storage_bucket": "saltto-recetario-guckskeks.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889990981952:android:b281ae90a14a88f6a5f2a5",
+        "android_client_info": {
+          "package_name": "com.saltto.gluckskeks_recipeapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "889990981952-e9nl8iaosao70sm3nrb1gnsvpn2in19o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjCTk8Wjx1d3sXyJRVZvRRnDJCIMoPAto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "889990981952-e9nl8iaosao70sm3nrb1gnsvpn2in19o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889990981952:android:835fcb06666e5023a5f2a5",
+        "android_client_info": {
+          "package_name": "com.saltto.recetario_gluckskeks"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "889990981952-2bo62r8lah3m1pq3d73b3ae2rn75v5kb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.saltto.recetario_gluckskeks",
+            "certificate_hash": "5070edfb646ca9f87f5dec140f10e69a12d2418f"
+          }
+        },
+        {
+          "client_id": "889990981952-e9nl8iaosao70sm3nrb1gnsvpn2in19o.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAjCTk8Wjx1d3sXyJRVZvRRnDJCIMoPAto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "889990981952-e9nl8iaosao70sm3nrb1gnsvpn2in19o.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

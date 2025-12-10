@@ -1,0 +1,128 @@
+package com.saltto.gluckskeks_recipeapp.navigation
+
+import android.app.Application
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.ActivityNavigator
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.saltto.gluckskeks_recipeapp.ui.screens.AddRecipeScreen
+import com.saltto.gluckskeks_recipeapp.ui.screens.HomeScreen
+import com.saltto.gluckskeks_recipeapp.ui.screens.LoginScreen
+import com.saltto.gluckskeks_recipeapp.ui.screens.ProfileScreen
+import com.saltto.gluckskeks_recipeapp.ui.screens.RecipeScreen
+import com.saltto.gluckskeks_recipeapp.ui.screens.SignUpScreen
+
+
+object Routes {
+    const val LOGIN = "login"
+    const val SIGNUP = "sign-up"
+    const val HOME = "home"
+    const val ADD_RECIPE = "add_recipe"
+    const val PROFILE = "profile"
+    const val RECIPE = "recipe/{recipeId}"
+}
+
+enum class DestinationNavBar(
+    val route: String,
+    val label: String,
+    val icon: ImageVector,
+    val contentDescription: String
+) {
+    HOME("home", "Home", Icons.Default.Home, "Main Menu"),
+    ADD_RECIPE("add_recipe", "New Recipe", Icons.Default.AddCircle, "New Recipe"),
+    PROFILE("profile", "Profile", Icons.Default.Person, "Go to Profile")
+}
+
+@Composable
+fun AppNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    NavHost(navController, startDestination = Routes.LOGIN) {
+        composable(Routes.LOGIN) { LoginScreen(navController) }
+        composable(Routes.SIGNUP) { SignUpScreen(navController) }
+        composable(Routes.HOME) { HomeScreen(navController, modifier) }
+        composable(Routes.PROFILE) { ProfileScreen(navController) }
+        composable(Routes.ADD_RECIPE) { AddRecipeScreen(navController, modifier) }
+        composable("recipe/{recipeId}") { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId") ?: return@composable
+            RecipeScreen(navController = navController, recipeID = recipeId, modifier = modifier)
+        }
+    }
+}
+
+
+@Composable
+fun AppNavigation(
+    navController: NavHostController = rememberNavController(),
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+    val startDestination = DestinationNavBar.HOME
+    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    // Get the current destination
+    val currentDestination = navBackStackEntry?.destination
+    val currentRoute = currentDestination?.route
+
+    Scaffold(
+        modifier = modifier,
+        bottomBar = {
+            if (currentRoute != "login" && currentRoute != "sign-up" && currentRoute != "add_recipe") {
+                NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                    DestinationNavBar.entries.forEachIndexed { index, destination ->
+                        NavigationBarItem(
+                            selected = selectedDestination == index,
+                            onClick = {
+                                navController.navigate(route = destination.route)
+                                selectedDestination = index
+                            },
+                            icon = {
+                                Icon(
+                                    destination.icon,
+                                    contentDescription = destination.contentDescription
+                                )
+                            },
+                            label = { Text(destination.label) }
+                        )
+                    }
+                }
+            } else {
+                selectedDestination = startDestination.ordinal
+            }
+        }
+    ) { contentPadding ->
+        AppNavHost(navController, modifier = Modifier.padding(contentPadding))
+    }
+}
+
+
