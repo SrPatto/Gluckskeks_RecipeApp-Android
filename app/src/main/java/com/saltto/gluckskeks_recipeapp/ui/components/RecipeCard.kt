@@ -49,7 +49,12 @@ import com.saltto.gluckskeks_recipeapp.R
 import com.saltto.gluckskeks_recipeapp.ui.theme.Gluckskeks_RecipeAppTheme
 
 @Composable
-fun RecipeCard(recipeID: String, onClickable: () -> Unit, isEditable: Boolean = false) {
+fun RecipeCard(
+    recipeID: String,
+    onClickable: () -> Unit,
+    isEditable: Boolean = false,
+    onEditClick: (String) -> Unit = {}
+) {
 
     var authorID by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -130,8 +135,7 @@ fun RecipeCard(recipeID: String, onClickable: () -> Unit, isEditable: Boolean = 
                             .removeValue()
                     },
                     onEdit = { id ->
-                        // navigation to edit screen
-                        onClickable() // or navController.navigate("edit/$id")
+                        onEditClick(id)
                     }
                 )
             }

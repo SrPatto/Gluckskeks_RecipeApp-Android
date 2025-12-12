@@ -177,7 +177,8 @@ fun ProfileScreen(navController: NavHostController, modifier: Modifier) {
                             RecipeCard(
                                 recipeID = recipeList[index],
                                 onClickable = { navController.navigate("recipe/${recipeList[index]}") },
-                                isEditable = true
+                                isEditable = true,
+                                onEditClick = { navController.navigate("edit_recipe/$it") }
                             )
                         }
                     }
