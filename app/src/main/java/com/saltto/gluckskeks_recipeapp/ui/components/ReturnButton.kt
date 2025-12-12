@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -51,10 +52,7 @@ fun ReturnButton(onReturn: () -> Unit) {
             )
             Text(
                 text = "Return",
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                style = MaterialTheme.typography.titleSmall
             )
         }
     }

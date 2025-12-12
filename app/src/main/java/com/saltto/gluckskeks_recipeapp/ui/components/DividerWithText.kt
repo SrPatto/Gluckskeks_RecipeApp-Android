@@ -16,7 +16,7 @@ fun DividerWithText(
     modifier: Modifier = Modifier,
     text: String,
     color: Color = MaterialTheme.colorScheme.onSurface.copy(alpha = 1f),
-    thickness: Dp = 1.dp,
+    thickness: Dp = 3.dp,
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -34,7 +34,7 @@ fun DividerWithText(
         Text(
             text = text,
             modifier = Modifier.padding(horizontal = 8.dp), // Add padding around the text
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyLarge
         )
 
         // Right Divider

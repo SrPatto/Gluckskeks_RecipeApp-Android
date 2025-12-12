@@ -74,7 +74,7 @@ fun ProfileScreen(navController: NavHostController) {
     Box(modifier = Modifier.fillMaxSize().padding(20.dp)) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-            Text("Profile", style = MaterialTheme.typography.headlineMedium)
+            Text("Profile", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(20.dp))
 
             if (!photoUrl.isNullOrEmpty()) {
@@ -102,7 +102,7 @@ fun ProfileScreen(navController: NavHostController) {
 
             // USERNAME + EDIT ICON
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(username, style = MaterialTheme.typography.headlineSmall)
+                Text(username, style = MaterialTheme.typography.bodyLarge)
                 IconButton(onClick = { showEditDialog = true }) {
                     Icon(Icons.Default.Edit, contentDescription = "edit username")
                 }
@@ -120,7 +120,7 @@ fun ProfileScreen(navController: NavHostController) {
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
-            ) { Text("Logout") }
+            ) { Text("Logout", style = MaterialTheme.typography.titleLarge) }
         }
     }
 

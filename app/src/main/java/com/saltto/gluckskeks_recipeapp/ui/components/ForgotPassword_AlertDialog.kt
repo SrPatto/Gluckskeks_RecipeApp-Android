@@ -4,6 +4,7 @@ import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,7 +31,7 @@ fun ForgotPassword_AlertDialog(
                 OutlinedTextField(
                     value = resetEmail,
                     onValueChange = { resetEmail = it },
-                    label = { Text(text = "Email") },
+                    label = { Text(text = "Email", style = MaterialTheme.typography.titleLarge) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )

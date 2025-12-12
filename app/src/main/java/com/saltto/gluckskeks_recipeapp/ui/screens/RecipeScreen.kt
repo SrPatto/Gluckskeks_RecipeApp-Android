@@ -204,12 +204,12 @@ fun RecipeScreen(
                 TagCardUI(recipeCategories)
             }
             item {
-                Text(text = recipeDescription, style = TextStyle.Default)
+                Text(text = recipeDescription,  style = MaterialTheme.typography.bodyLarge)
             }
 
             item {
                 Column(Modifier.fillMaxWidth()) {
-                    Text("Ingredients", style = MaterialTheme.typography.headlineMedium)
+                    Text("Ingredients", style = MaterialTheme.typography.titleLarge)
                     Spacer(Modifier.height(6.dp))
 
                     recipeIngredients.forEach { ingredient ->
@@ -224,9 +224,9 @@ fun RecipeScreen(
             }
             item {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    Text("Instructions", style = MaterialTheme.typography.headlineMedium)
+                    Text("Instructions", style = MaterialTheme.typography.titleLarge)
                     Spacer(modifier = Modifier.height(6.dp))
-                    Text(text = recipeInstructions, style = TextStyle.Default)
+                    Text(text = recipeInstructions, style = MaterialTheme.typography.bodyLarge)
                 }
             }
         }

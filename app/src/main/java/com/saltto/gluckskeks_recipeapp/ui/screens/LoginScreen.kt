@@ -5,6 +5,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -90,13 +91,13 @@ fun LoginScreen(navController: NavHostController) {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Sign In", style = MaterialTheme.typography.headlineMedium)
+            Text(text = "Sign In", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = "Email") },
+                label = { Text(text = "Email", style = MaterialTheme.typography.titleLarge) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -105,7 +106,7 @@ fun LoginScreen(navController: NavHostController) {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("Password", style = MaterialTheme.typography.titleLarge) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
@@ -149,9 +150,10 @@ fun LoginScreen(navController: NavHostController) {
                             }
                     }
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = 12.dp, horizontal = 16.dp)
             ) {
-                Text(text = "Sign In")
+                Text(text = "Sign In", style = MaterialTheme.typography.titleLarge)
             }
             Spacer(modifier = Modifier.height(8.dp))
 

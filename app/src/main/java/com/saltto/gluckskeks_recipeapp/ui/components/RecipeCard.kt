@@ -107,10 +107,10 @@ fun RecipeCard(recipeID: String, onClickable: () -> Unit) {
                         .clip(CircleShape)
                 )
             }
-            Text(username, modifier = Modifier.padding(12.dp))
+            Text(username, modifier = Modifier.padding(8.dp), style = MaterialTheme.typography.titleLarge)
         }
 
-        Column(Modifier.padding(8.dp)) {
+        Column(Modifier.padding(5.dp)) {
             //Recipe image
             if (!recipeImg.isNullOrEmpty()) {
                 Image(
@@ -131,10 +131,10 @@ fun RecipeCard(recipeID: String, onClickable: () -> Unit) {
                 )
             }
 
-            Text(recipeName, style = MaterialTheme.typography.headlineSmall)
-            Text(recipeDescription, maxLines = 3, overflow = TextOverflow.Ellipsis)
+            Text(recipeName, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp))
+            Text(recipeDescription, maxLines = 3, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp))
 
-            Box(modifier = Modifier.padding(0.dp, 16.dp)) { TagCardUI(recipeCategories) }
+            Box(modifier = Modifier.padding(5.dp, 8.dp,8.dp,8.dp)) { TagCardUI(recipeCategories) }
         }
     }
 }

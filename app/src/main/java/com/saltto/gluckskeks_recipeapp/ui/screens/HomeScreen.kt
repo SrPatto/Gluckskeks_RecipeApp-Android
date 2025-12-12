@@ -60,7 +60,7 @@ fun HomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Text("GLUCKSKEKS", style = MaterialTheme.typography.headlineMedium)
+            Text("GLUCKSKEKS", style = MaterialTheme.typography.titleLarge)
         }
         Spacer(modifier = Modifier.height(4.dp))
 

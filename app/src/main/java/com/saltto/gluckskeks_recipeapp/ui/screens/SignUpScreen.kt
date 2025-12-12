@@ -43,13 +43,13 @@ fun SignUpScreen(navController: NavHostController) {
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = "Sign Up", style = MaterialTheme.typography.headlineMedium)
+            Text(text = "Sign Up", style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(24.dp))
 
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text(text = "Email") },
+                label = { Text(text = "Email", style = MaterialTheme.typography.titleLarge) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -58,7 +58,7 @@ fun SignUpScreen(navController: NavHostController) {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("Password", style = MaterialTheme.typography.titleLarge) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )

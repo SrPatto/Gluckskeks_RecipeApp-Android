@@ -45,6 +45,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
@@ -120,7 +121,7 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Recipe Name") },
+                    label = { Text("Recipe Name:",style = MaterialTheme.typography.titleLarge) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -128,7 +129,7 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description") },
+                    label = { Text("Description:",style = MaterialTheme.typography.titleLarge) },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 4
                 )
@@ -144,7 +145,7 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                 OutlinedTextField(
                     value = ingredients,
                     onValueChange = { ingredients = it },
-                    label = { Text("Ingredients (comma-separated)") },
+                    label = { Text("Ingredients (comma-separated):",style = MaterialTheme.typography.titleLarge) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -152,7 +153,7 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                 OutlinedTextField(
                     value = instructions,
                     onValueChange = { instructions = it },
-                    label = { Text("Instructions") },
+                    label = { Text("Instructions:",style = MaterialTheme.typography.titleLarge) },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 8
                 )
@@ -182,16 +183,39 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                     }
 
                     Spacer(Modifier.height(10.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            onClick = {
+                                pickPhotoLauncher.launch(
+                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                                )
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                "Choose from Gallery",
+                                style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Button(onClick = {
-                            pickPhotoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        }) { Text("Choose from Gallery") }
-
-                        Button(onClick = { cameraLauncher.launch() }) {
-                            Text("Take Photo")
+                        Button(
+                            onClick = { cameraLauncher.launch() },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                "Take Photo",
+                                style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
+
                 }
             }
             item {

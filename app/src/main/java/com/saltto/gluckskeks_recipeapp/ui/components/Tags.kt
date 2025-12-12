@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -64,11 +65,7 @@ fun TagEditItem(
     ) {
         Text(
             text = text,
-            style = TextStyle(
-                color = Color.DarkGray,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
+            style = MaterialTheme.typography.titleSmall
         )
         IconButton(
             onClick = {
@@ -107,18 +104,12 @@ fun TagInputField(
                 onDone(tag)
             }
         ),
-        textStyle = TextStyle(
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            color = Color.DarkGray
-        )
+        textStyle = MaterialTheme.typography.headlineSmall
     ) {
         Box {
             if (tag.isEmpty())
                 Text(
-                    text = "Add Tag", style = TextStyle(
-                        fontSize = 14.sp,
-                    )
+                    text = "Add Tag", style = MaterialTheme.typography.titleSmall
                 )
             it.invoke()
         }
@@ -193,11 +184,9 @@ fun TagItem(
         )
         Text(
             text = text,
-            style = TextStyle(
-                color = Color.DarkGray,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
-            )
+            style = MaterialTheme.typography.titleSmall,
+            color = Color.Black
+
         )
     }
 }
@@ -216,12 +205,12 @@ fun TagCardUI(
             .fillMaxWidth()
     ) {
         FlowRow(
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             tags.forEach { item ->
                 TagItem(
-                    text = item
+                    text = item,
                 )
             }
         }
