@@ -2,6 +2,7 @@ package com.saltto.gluckskeks_recipeapp.ui.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,11 +15,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +49,7 @@ import com.saltto.gluckskeks_recipeapp.R
 import com.saltto.gluckskeks_recipeapp.ui.theme.Gluckskeks_RecipeAppTheme
 
 @Composable
-fun RecipeCard(recipeID: String, onClickable: () -> Unit) {
+fun RecipeCard(recipeID: String, onClickable: () -> Unit, isEditable: Boolean = false) {
 
     var authorID by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -88,26 +91,50 @@ fun RecipeCard(recipeID: String, onClickable: () -> Unit) {
             .clickable { onClickable() },
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-            if (!userPhoto.isNullOrEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(userPhoto),
-                    contentDescription = "User image",
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = null,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+                if (!userPhoto.isNullOrEmpty()) {
+                    Image(
+                        painter = rememberAsyncImagePainter(userPhoto),
+                        contentDescription = "User image",
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                    )
+                }
+                Text(username, modifier = Modifier.padding(12.dp))
+            }
+            if (isEditable) {
+                RecipeDropdownMenu(
+                    recipeID = recipeID,
+                    onDelete = { id ->
+                        // your delete function
+                        FirebaseDatabase.getInstance().reference
+                            .child("recipes")
+                            .child(id)
+                            .removeValue()
+                    },
+                    onEdit = { id ->
+                        // navigation to edit screen
+                        onClickable() // or navController.navigate("edit/$id")
+                    }
                 )
             }
-            Text(username, modifier = Modifier.padding(12.dp))
         }
 
         Column(Modifier.padding(8.dp)) {

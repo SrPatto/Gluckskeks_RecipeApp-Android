@@ -82,9 +82,10 @@ fun HomeScreen(
 
                 else -> {
                     items(recipeList.size) { index ->
-                        RecipeCard(recipeList[index]) {
-                            navController.navigate("recipe/${recipeList[index]}")
-                        }
+                        RecipeCard(
+                            recipeID = recipeList[index],
+                            onClickable = { navController.navigate("recipe/${recipeList[index]}") }
+                        )
                     }
                 }
             }

@@ -69,7 +69,7 @@ fun AppNavHost(
         composable(Routes.LOGIN) { LoginScreen(navController) }
         composable(Routes.SIGNUP) { SignUpScreen(navController) }
         composable(Routes.HOME) { HomeScreen(navController, modifier) }
-        composable(Routes.PROFILE) { ProfileScreen(navController) }
+        composable(Routes.PROFILE) { ProfileScreen(navController, modifier) }
         composable(Routes.ADD_RECIPE) { AddRecipeScreen(navController, modifier) }
         composable("recipe/{recipeId}") { backStackEntry ->
             val recipeId = backStackEntry.arguments?.getString("recipeId") ?: return@composable
