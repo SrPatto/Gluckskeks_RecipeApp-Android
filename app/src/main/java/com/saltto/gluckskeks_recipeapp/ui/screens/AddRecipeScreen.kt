@@ -124,7 +124,7 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Recipe Name:",style = MaterialTheme.typography.titleLarge) },
+                    label = { Text("Recipe Name:", style = MaterialTheme.typography.titleLarge) },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -132,7 +132,7 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description:",style = MaterialTheme.typography.titleLarge) },
+                    label = { Text("Description:", style = MaterialTheme.typography.titleLarge) },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 4
                 )
@@ -148,7 +148,12 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                 OutlinedTextField(
                     value = ingredients,
                     onValueChange = { ingredients = it },
-                    label = { Text("Ingredients (comma-separated):",style = MaterialTheme.typography.titleLarge) },
+                    label = {
+                        Text(
+                            "Ingredients (comma-separated):",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -156,7 +161,7 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                 OutlinedTextField(
                     value = instructions,
                     onValueChange = { instructions = it },
-                    label = { Text("Instructions:",style = MaterialTheme.typography.titleLarge) },
+                    label = { Text("Instructions:", style = MaterialTheme.typography.titleLarge) },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 8
                 )
@@ -208,26 +213,33 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                             )
                         }
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Button(onClick = {
-                            pickPhotoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        }) { Text("Choose from Gallery") }
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Button(onClick = {
+                                pickPhotoLauncher.launch(
+                                    PickVisualMediaRequest(
+                                        ActivityResultContracts.PickVisualMedia.ImageOnly
+                                    )
+                                )
+                            }) { Text("Choose from Gallery") }
 
-                        Button(onClick = {
-                            val uri = createImageUri(context)
-                            capturedImageUri = uri      // store the URI
-                            takePhotoLauncher.launch(uri)
-                        },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                "Take Photo",
-                                style = MaterialTheme.typography.titleSmall,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            Button(
+                                onClick = {
+                                    val uri = createImageUri(context)
+                                    capturedImageUri = uri      // store the URI
+                                    takePhotoLauncher.launch(uri)
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    "Take Photo",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                        }
                     }
-
                 }
             }
             item {
@@ -256,17 +268,26 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                                             "picture" to downloadUrl.toString()
                                         )
 
-                                        FirebaseDatabase.getInstance().getReference("recipes")
+                                        FirebaseDatabase.getInstance()
+                                            .getReference("recipes")
                                             .child(recipeId)
                                             .setValue(recipeData)
 
-                                        Toast.makeText(context, "Recipe added!", Toast.LENGTH_SHORT)
+                                        Toast.makeText(
+                                            context,
+                                            "Recipe added!",
+                                            Toast.LENGTH_SHORT
+                                        )
                                             .show()
                                         navController.popBackStack()
                                     }
                                 }
                         } else {
-                            Toast.makeText(context, "Select an image first!", Toast.LENGTH_SHORT)
+                            Toast.makeText(
+                                context,
+                                "Select an image first!",
+                                Toast.LENGTH_SHORT
+                            )
                                 .show()
                         }
                     },
@@ -276,6 +297,7 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
         }
     }
 }
+
 
 fun saveBitmapToCache(context: Context, bitmap: Bitmap): Uri {
     val filename = "${System.currentTimeMillis()}.jpg"

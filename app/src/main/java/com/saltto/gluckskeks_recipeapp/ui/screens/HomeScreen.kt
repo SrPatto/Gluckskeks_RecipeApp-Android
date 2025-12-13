@@ -42,9 +42,15 @@ fun HomeScreen(
         recipesRef.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 recipeList.clear()
+
+                val tempList = mutableListOf<String>()
                 for (recipe in snapshot.children) {
-                    recipeList.add(recipe.key.toString())   // store recipe ID
+                    recipe.key?.let { tempList.add(it) }
                 }
+
+                tempList.shuffle()
+
+                recipeList.addAll(tempList)
                 isLoading.value = false
             }
 

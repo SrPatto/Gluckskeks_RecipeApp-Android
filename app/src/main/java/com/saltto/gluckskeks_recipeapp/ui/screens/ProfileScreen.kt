@@ -3,15 +3,20 @@ package com.saltto.gluckskeks_recipeapp.ui.screens
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
+import android.widget.ToggleButton
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,10 +41,14 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.saltto.gluckskeks_recipeapp.navigation.Routes
 import com.saltto.gluckskeks_recipeapp.ui.components.RecipeCard
+import kotlinx.coroutines.launch
 import kotlin.toString
 
 @Composable
-fun ProfileScreen(navController: NavHostController, modifier: Modifier) {
+fun ProfileScreen(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
 
     val context = LocalContext.current
     val auth = FirebaseAuth.getInstance()
@@ -49,166 +58,209 @@ fun ProfileScreen(navController: NavHostController, modifier: Modifier) {
     var photoUrl by remember { mutableStateOf<String?>(null) }
     var showEditDialog by remember { mutableStateOf(false) }
 
-    val database = FirebaseDatabase.getInstance().reference.child("users").child(uid)
-    val storageRef = FirebaseStorage.getInstance().reference.child("user_photos/$uid.jpg")
+    val userRef = FirebaseDatabase.getInstance()
+        .reference.child("users").child(uid)
 
+    val storageRef = FirebaseStorage.getInstance()
+        .reference.child("user_photos/$uid.jpg")
+
+    // SEGMENTED BUTTON STATE
+    val options = listOf("Your Recipes", "Favorites")
+    var selectedIndex by remember { mutableIntStateOf(0) }
+
+    // RECIPES STATE
     val recipeList = remember { mutableStateListOf<String>() }
-    var isLoading by remember { mutableStateOf(true) }
-    // Pick image launcher
+    var isLoading by remember { mutableStateOf(false) }
+
+    // IMAGE PICKER
     val imagePicker =
-        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-            uri?.let {
-                storageRef.putFile(it).addOnSuccessListener {
-                    storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                        database.child("photoUrl").setValue(downloadUrl.toString())
-                        photoUrl = downloadUrl.toString()
-                        Toast.makeText(context, "Profile photo updated!", Toast.LENGTH_SHORT).show()
-                    }
+        rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            uri ?: return@rememberLauncherForActivityResult
+            storageRef.putFile(uri).addOnSuccessListener {
+                storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
+                    userRef.child("photoUrl").setValue(downloadUrl.toString())
+                    photoUrl = downloadUrl.toString()
+                    Toast.makeText(context, "Profile photo updated!", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+
     val imageModifier = Modifier
         .size(140.dp)
         .clip(CircleShape)
         .clickable { imagePicker.launch("image/*") }
 
-    // Load data
+    // LOAD USER INFO
     LaunchedEffect(uid) {
-        database.get().addOnSuccessListener { snap ->
+        userRef.get().addOnSuccessListener { snap ->
             username = snap.child("username").value?.toString() ?: "Unknown User"
             photoUrl = snap.child("photoUrl").value?.toString()
         }
-
-        val recipesRef = FirebaseDatabase.getInstance().reference
-            .child("recipes")
-            .orderByChild("author")
-            .equalTo(uid)
-
-        recipesRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                recipeList.clear()
-                for (recipe in snapshot.children) {
-                    recipeList.add(recipe.key.toString())   // store recipe ID
-                }
-                isLoading = false
-            }
-
-            override fun onCancelled(error: DatabaseError) {}
-        })
     }
 
+    // LOAD RECIPES BASED ON FILTER
+    LaunchedEffect(selectedIndex, uid) {
+        isLoading = true
+        recipeList.clear()
+
+        if (selectedIndex == 0) {
+            loadUserRecipes(uid, recipeList) {
+                isLoading = false
+            }
+        } else {
+            loadFavoriteRecipes(uid, recipeList) {
+                isLoading = false
+            }
+        }
+    }
+
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val showScrollToTop by remember {
+        derivedStateOf { listState.firstVisibleItemIndex > 0 }
+    }
+
+    // UI
     Box(
         modifier = modifier
             .fillMaxSize()
             .padding(20.dp)
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
             Text("Profile", style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(20.dp))
 
             if (!photoUrl.isNullOrEmpty()) {
                 Image(
-                    painter = rememberAsyncImagePainter(model = photoUrl),
-                    contentDescription = "Profile Photo",
+                    painter = rememberAsyncImagePainter(photoUrl),
+                    contentDescription = null,
                     modifier = imageModifier,
                     contentScale = ContentScale.Crop
                 )
             } else {
-                Box(
-                    modifier = imageModifier,
-                    contentAlignment = Alignment.Center
-                ) {
+                Box(imageModifier, contentAlignment = Alignment.Center) {
                     Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Default Profile",
-                        modifier = Modifier.size(90.dp),
-                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        Icons.Default.Person,
+                        contentDescription = null,
+                        modifier = Modifier.size(90.dp)
                     )
                 }
             }
 
             Spacer(Modifier.height(12.dp))
 
-            // USERNAME + EDIT ICON
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(username, style = MaterialTheme.typography.bodyLarge)
+                Text(username)
                 IconButton(onClick = { showEditDialog = true }) {
-                    Icon(Icons.Default.Edit, contentDescription = "edit username")
+                    Icon(Icons.Default.Edit, contentDescription = null)
                 }
             }
 
-            Spacer(Modifier.height(32.dp))
-
-            Button(
-                onClick = {
-                    signOut(context) {
-                        Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
-                        navController.navigate(Routes.LOGIN) {
-                            popUpTo(Routes.PROFILE) { inclusive = true }
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) { Text("Logout", style = MaterialTheme.typography.titleLarge) }
-
-            Spacer(Modifier.height(16.dp))
-            HorizontalDivider()
             Spacer(Modifier.height(16.dp))
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp, 0.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                when {
-                    isLoading -> {
-                        item { Text("Loading recipes...") }
-                    }
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                options.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        selected = selectedIndex == index,
+                        onClick = { selectedIndex = index },
+                        label = { Text(label) },
+                        shape = SegmentedButtonDefaults.itemShape(index, options.size)
+                    )
+                }
+            }
+        }
 
-                    recipeList.isEmpty() -> {
-                        item { Text("No recipes yet — upload one!") }
-                    }
+        LazyColumn(
+            state = listState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 380.dp), // adjust to header height
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
 
-                    else -> {
-                        items(recipeList.size) { index ->
-                            RecipeCard(
-                                recipeID = recipeList[index],
-                                onClickable = { navController.navigate("recipe/${recipeList[index]}") },
-                                isEditable = true,
-                                onEditClick = { navController.navigate("edit_recipe/$it") }
-                            )
-                        }
+            when {
+                isLoading -> {
+                    item { Text("Loading recipes...") }
+                }
+
+                recipeList.isEmpty() -> {
+                    item {
+                        Text(
+                            if (selectedIndex == 0)
+                                "You haven't created any recipes yet"
+                            else
+                                "No favorite recipes yet"
+                        )
+                    }
+                }
+
+                else -> {
+                    items(recipeList.size) { index ->
+                        val recipeId = recipeList[index]
+                        RecipeCard(
+                            recipeID = recipeId,
+                            onClickable = { navController.navigate("recipe/$recipeId") },
+                            isEditable = selectedIndex == 0,
+                            onEditClick = { navController.navigate("edit_recipe/$it") }
+                        )
                     }
                 }
             }
         }
     }
 
+    if (showScrollToTop) {
+        FloatingActionButton(
+            onClick = {
+                coroutineScope.launch {
+                    listState.animateScrollToItem(0)
+                }
+            },
+            modifier = Modifier
+//                .align(Alignment.BottomEnd)
+                .padding(16.dp),
+        ) {
+            Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Back to top")
+        }
+    }
+
+    // EDIT USERNAME DIALOG
     if (showEditDialog) {
         var newName by remember { mutableStateOf(username) }
 
         AlertDialog(
             onDismissRequest = { showEditDialog = false },
-            confirmButton = {
-                Button(onClick = {
-                    database.child("username").setValue(newName)
-                    username = newName
-                    showEditDialog = false
-                }) { Text("Save") }
-            },
-            dismissButton = {
-                Button(onClick = { showEditDialog = false }) { Text("Cancel") }
-            },
             title = { Text("Edit Username") },
             text = {
-                TextField(value = newName, onValueChange = { newName = it })
+                TextField(
+                    value = newName,
+                    onValueChange = { newName = it }
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    userRef.child("username").setValue(newName)
+                    username = newName
+                    showEditDialog = false
+                }) {
+                    Text("Save")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showEditDialog = false }) {
+                    Text("Cancel")
+                }
             }
         )
     }
 }
+
 
 fun signOut(context: Context, onComplete: () -> Unit) {
     val webClientId = "889990981952-e9nl8iaosao70sm3nrb1gnsvpn2in19o.apps.googleusercontent.com"
@@ -223,4 +275,39 @@ fun signOut(context: Context, onComplete: () -> Unit) {
     googleSignInClient.signOut().addOnCompleteListener {
         onComplete()
     }
+}
+
+fun loadUserRecipes(
+    uid: String,
+    recipeList: MutableList<String>,
+    onDone: () -> Unit
+) {
+    FirebaseDatabase.getInstance().reference
+        .child("recipes")
+        .orderByChild("author")
+        .equalTo(uid)
+        .get()
+        .addOnSuccessListener { snapshot ->
+            for (recipe in snapshot.children) {
+                recipe.key?.let { recipeList.add(it) }
+            }
+            onDone()
+        }
+}
+
+fun loadFavoriteRecipes(
+    uid: String,
+    recipeList: MutableList<String>,
+    onDone: () -> Unit
+) {
+    FirebaseDatabase.getInstance().reference
+        .child("favorites")
+        .child(uid)
+        .get()
+        .addOnSuccessListener { snapshot ->
+            for (fav in snapshot.children) {
+                fav.key?.let { recipeList.add(it) }
+            }
+            onDone()
+        }
 }

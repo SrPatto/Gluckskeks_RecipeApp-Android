@@ -36,8 +36,10 @@ import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.google.android.gms.common.internal.ImagesContract.URL
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.saltto.gluckskeks_recipeapp.R
+import com.saltto.gluckskeks_recipeapp.ui.components.FavoriteIconButton
 import com.saltto.gluckskeks_recipeapp.ui.components.ReturnButton
 import com.saltto.gluckskeks_recipeapp.ui.components.TagCardUI
 import kotlinx.coroutines.CoroutineScope
@@ -54,6 +56,13 @@ fun RecipeScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    val favoritesRef = FirebaseDatabase.getInstance()
+        .getReference("favorites")
+        .child(uid ?: "")
+
+    var isFavorite by remember { mutableStateOf(false) }
 
     var authorID by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -143,6 +152,16 @@ fun RecipeScreen(
         }
     }
 
+    LaunchedEffect(recipeID, uid) {
+        if (uid == null) return@LaunchedEffect
+
+        favoritesRef.child(recipeID)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                isFavorite = snapshot.exists()
+            }
+    }
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -160,12 +179,37 @@ fun RecipeScreen(
             ReturnButton {
                 navController.popBackStack()
             }
-            IconButton(onClick = { shareRecipe() }) {
-                Icon(
-                    painter = painterResource(R.drawable.share_icon),
-                    contentDescription = "Share Recipe"
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+                IconButton(onClick = { shareRecipe() }) {
+                    Icon(
+                        painter = painterResource(R.drawable.share_icon),
+                        contentDescription = "Share Recipe"
+                    )
+                }
+                FavoriteIconButton(
+                    isFavorite = isFavorite,
+                    onToggle = { newValue ->
+                        if (uid == null) return@FavoriteIconButton
+
+                        if (newValue) {
+                            FirebaseDatabase.getInstance()
+                                .getReference("favorites")
+                                .child(uid)
+                                .child(recipeID)
+                                .setValue(true)
+                        } else {
+                            FirebaseDatabase.getInstance()
+                                .getReference("favorites")
+                                .child(uid)
+                                .child(recipeID)
+                                .removeValue()
+                        }
+
+                        isFavorite = newValue
+                    }
                 )
             }
+
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -204,7 +248,7 @@ fun RecipeScreen(
                 TagCardUI(recipeCategories)
             }
             item {
-                Text(text = recipeDescription,  style = MaterialTheme.typography.bodyLarge)
+                Text(text = recipeDescription, style = MaterialTheme.typography.bodyLarge)
             }
 
             item {

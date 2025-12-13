@@ -43,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
 import com.saltto.gluckskeks_recipeapp.R
@@ -55,6 +56,12 @@ fun RecipeCard(
     isEditable: Boolean = false,
     onEditClick: (String) -> Unit = {}
 ) {
+    val uid = FirebaseAuth.getInstance().currentUser?.uid
+    val favoritesRef = FirebaseDatabase.getInstance()
+        .getReference("favorites")
+        .child(uid ?: "")
+
+    var isFavorite by remember { mutableStateOf(false) }
 
     var authorID by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
@@ -88,6 +95,16 @@ fun RecipeCard(
                     userPhoto = snap.child("photoUrl").value?.toString()
                 }
         }
+    }
+
+    LaunchedEffect(recipeID, uid) {
+        if (uid == null) return@LaunchedEffect
+
+        favoritesRef.child(recipeID)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                isFavorite = snapshot.exists()
+            }
     }
 
     ElevatedCard(
@@ -124,21 +141,55 @@ fun RecipeCard(
                 }
                 Text(username, modifier = Modifier.padding(12.dp))
             }
-            if (isEditable) {
-                RecipeDropdownMenu(
-                    recipeID = recipeID,
-                    onDelete = { id ->
-                        // your delete function
-                        FirebaseDatabase.getInstance().reference
-                            .child("recipes")
-                            .child(id)
-                            .removeValue()
-                    },
-                    onEdit = { id ->
-                        onEditClick(id)
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+                if (isEditable) {
+                    RecipeDropdownMenu(
+                        recipeID = recipeID,
+                        onDelete = { id ->
+
+                            val db = FirebaseDatabase.getInstance().reference
+
+                            db.child("recipes")
+                                .child(id)
+                                .removeValue()
+
+                            db.child("favorites")
+                                .get()
+                                .addOnSuccessListener { snapshot ->
+                                    snapshot.children.forEach { userNode ->
+                                        userNode.child(id).ref.removeValue()
+                                    }
+                                }
+                        },
+                        onEdit = { id ->
+                            onEditClick(id)
+                        }
+                    )
+                }
+                FavoriteIconButton(
+                    isFavorite = isFavorite,
+                    onToggle = { newValue ->
+                        if (uid == null) return@FavoriteIconButton
+
+                        if (newValue) {
+                            FirebaseDatabase.getInstance()
+                                .getReference("favorites")
+                                .child(uid)
+                                .child(recipeID)
+                                .setValue(true)
+                        } else {
+                            FirebaseDatabase.getInstance()
+                                .getReference("favorites")
+                                .child(uid)
+                                .child(recipeID)
+                                .removeValue()
+                        }
+
+                        isFavorite = newValue
                     }
                 )
             }
+
         }
 
         Column(Modifier.padding(5.dp)) {
@@ -162,10 +213,20 @@ fun RecipeCard(
                 )
             }
 
-            Text(recipeName, style = MaterialTheme.typography.titleSmall, modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp))
-            Text(recipeDescription, maxLines = 3, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp))
+            Text(
+                recipeName,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
+            )
+            Text(
+                recipeDescription,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.headlineSmall,
+                modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
+            )
 
-            Box(modifier = Modifier.padding(5.dp, 8.dp,8.dp,8.dp)) { TagCardUI(recipeCategories) }
+            Box(modifier = Modifier.padding(5.dp, 8.dp, 8.dp, 8.dp)) { TagCardUI(recipeCategories) }
         }
     }
 }
