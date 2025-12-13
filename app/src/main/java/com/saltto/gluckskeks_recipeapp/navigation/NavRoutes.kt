@@ -34,6 +34,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.saltto.gluckskeks_recipeapp.ui.screens.AddRecipeScreen
+import com.saltto.gluckskeks_recipeapp.ui.screens.EditRecipeScreen
 import com.saltto.gluckskeks_recipeapp.ui.screens.HomeScreen
 import com.saltto.gluckskeks_recipeapp.ui.screens.LoginScreen
 import com.saltto.gluckskeks_recipeapp.ui.screens.ProfileScreen
@@ -45,9 +46,11 @@ object Routes {
     const val LOGIN = "login"
     const val SIGNUP = "sign-up"
     const val HOME = "home"
-    const val ADD_RECIPE = "add_recipe"
     const val PROFILE = "profile"
+
     const val RECIPE = "recipe/{recipeId}"
+    const val ADD_RECIPE = "add_recipe"
+    const val EDIT_RECIPE = "edit_recipe/{recipeId}"
 }
 
 enum class DestinationNavBar(
@@ -70,11 +73,16 @@ fun AppNavHost(
         composable(Routes.LOGIN) { LoginScreen(navController) }
         composable(Routes.SIGNUP) { SignUpScreen(navController) }
         composable(Routes.HOME) { HomeScreen(navController, modifier) }
-        composable(Routes.PROFILE) { ProfileScreen(navController) }
+        composable(Routes.PROFILE) { ProfileScreen(navController, modifier) }
         composable(Routes.ADD_RECIPE) { AddRecipeScreen(navController, modifier) }
-        composable("recipe/{recipeId}") { backStackEntry ->
+        composable(Routes.RECIPE) { backStackEntry ->
             val recipeId = backStackEntry.arguments?.getString("recipeId") ?: return@composable
-            RecipeScreen(navController = navController, recipeID = recipeId, modifier = modifier)
+            RecipeScreen(navController, recipeID = recipeId, modifier)
+        }
+
+        composable(Routes.EDIT_RECIPE) { backStackEntry ->
+            val recipeId = backStackEntry.arguments?.getString("recipeId") ?: return@composable
+            EditRecipeScreen(navController, recipeID = recipeId, modifier)
         }
     }
 }
@@ -95,10 +103,17 @@ fun AppNavigation(
     val currentDestination = navBackStackEntry?.destination
     val currentRoute = currentDestination?.route
 
+    val hideBottomBar = currentRoute?.let {
+        it.startsWith("login") ||
+                it.startsWith("sign-up") ||
+                it.startsWith("add_recipe") ||
+                it.startsWith("edit_recipe")
+    } ?: false
+
     Scaffold(
         modifier = modifier,
         bottomBar = {
-            if (currentRoute != "login" && currentRoute != "sign-up" && currentRoute != "add_recipe") {
+            if (!hideBottomBar) {
                 NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
                     DestinationNavBar.entries.forEachIndexed { index, destination ->
                         NavigationBarItem(
@@ -118,7 +133,7 @@ fun AppNavigation(
                     }
                 }
             } else {
-                selectedDestination = startDestination.ordinal
+//                selectedDestination = startDestination.ordinal
             }
         }
     ) { contentPadding ->

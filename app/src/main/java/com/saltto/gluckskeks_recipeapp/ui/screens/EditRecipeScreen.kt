@@ -9,7 +9,6 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,20 +18,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,16 +32,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
-import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
@@ -61,21 +49,50 @@ import com.saltto.gluckskeks_recipeapp.utils.createImageUri
 import java.io.File
 
 @Composable
-fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
+fun EditRecipeScreen(
+    navController: NavHostController,
+    recipeID: String,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: return
 
-    val auth = FirebaseAuth.getInstance()
-    val uid = auth.currentUser?.uid ?: return
+    val recipeRef = FirebaseDatabase.getInstance().getReference("recipes").child(recipeID)
 
+    // States that will be filled when data loads
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var ingredients by remember { mutableStateOf("") }
     var instructions by remember { mutableStateOf("") }
     var categories = remember { mutableStateListOf<String>() }
     var photoUri by remember { mutableStateOf<Uri?>(null) }
+    var originalPhotoUrl by remember { mutableStateOf<String?>(null) }
     var capturedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-// Camera launcher
+    var isLoading by remember { mutableStateOf(true) }
+
+    // Load recipe once
+    LaunchedEffect(Unit) {
+        recipeRef.get().addOnSuccessListener { snapshot ->
+            if (snapshot.exists()) {
+                name = snapshot.child("name").value.toString()
+                description = snapshot.child("description").value.toString()
+                ingredients = snapshot.child("ingredients")
+                    .children.joinToString(",") { it.value.toString() }
+                instructions = snapshot.child("instructions").value.toString()
+
+                categories.clear()
+                snapshot.child("categories").children.forEach {
+                    categories.add(it.value.toString())
+                }
+
+                originalPhotoUrl = snapshot.child("picture").value.toString()
+                isLoading = false
+            }
+        }
+    }
+
+    // Camera launcher
     val takePhotoLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
@@ -87,56 +104,55 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
         }
     }
 
-// Gallery launcher
+    // Gallery launcher
     val pickPhotoLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> photoUri = uri }
-    )
+        ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) photoUri = uri
+    }
+
+    if (isLoading) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Loading recipe...")
+        }
+        return
+    }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(16.dp)
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            ReturnButton {
-                navController.popBackStack()
-            }
-        }
-        Spacer(modifier = Modifier.height(16.dp))
+        ReturnButton { navController.popBackStack() }
 
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp, 0.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
             item {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Text(text = "New Recipe", style = MaterialTheme.typography.titleLarge)
-                }
+                Text("Edit Recipe", style = MaterialTheme.typography.titleLarge)
             }
 
             item {
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Recipe Name:",style = MaterialTheme.typography.titleLarge) },
+                    label = { Text("Recipe Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+
             item {
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description:",style = MaterialTheme.typography.titleLarge) },
+                    label = { Text("Description") },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 4
                 )
             }
+
             item {
                 TagInputUI(
                     tags = categories,
@@ -144,19 +160,21 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                     onRemoveTag = { categories.remove(it) }
                 )
             }
+
             item {
                 OutlinedTextField(
                     value = ingredients,
                     onValueChange = { ingredients = it },
-                    label = { Text("Ingredients (comma-separated):",style = MaterialTheme.typography.titleLarge) },
+                    label = { Text("Ingredients (comma-separated)") },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+
             item {
                 OutlinedTextField(
                     value = instructions,
                     onValueChange = { instructions = it },
-                    label = { Text("Instructions:",style = MaterialTheme.typography.titleLarge) },
+                    label = { Text("Instructions") },
                     modifier = Modifier.fillMaxWidth(),
                     maxLines = 8
                 )
@@ -169,9 +187,9 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                         .height(200.dp)
                         .fillMaxWidth()
 
-                    // Show preview
-                    if (photoUri != null) {
-                        Image(
+                    // Show selected image OR original image
+                    when {
+                        photoUri != null -> Image(
                             painter = rememberAsyncImagePainter(photoUri),
                             contentDescription = "Recipe photo",
                             modifier = Modifier
@@ -179,8 +197,15 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                                 .height(200.dp),
                             contentScale = ContentScale.Crop
                         )
-                    } else {
-                        Image(
+
+                        originalPhotoUrl != null -> Image(
+                            painter = rememberAsyncImagePainter(originalPhotoUrl),
+                            contentDescription = null,
+                            modifier = imageModifier,
+                            contentScale = ContentScale.Crop
+                        )
+
+                        else -> Image(
                             painter = painterResource(R.drawable.default_image),
                             contentDescription = null,
                             modifier = imageModifier
@@ -188,66 +213,40 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                     }
 
                     Spacer(Modifier.height(10.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Button(
-                            onClick = {
-                                pickPhotoLauncher.launch(
-                                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                                )
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                "Choose from Gallery",
-                                style = MaterialTheme.typography.titleSmall,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         Button(onClick = {
-                            pickPhotoLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                        }) { Text("Choose from Gallery") }
+                            pickPhotoLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }) { Text("Gallery") }
 
                         Button(onClick = {
                             val uri = createImageUri(context)
                             capturedImageUri = uri      // store the URI
                             takePhotoLauncher.launch(uri)
-                        },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(
-                                "Take Photo",
-                                style = MaterialTheme.typography.titleSmall,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                        }) {
+                            Text("Take Photo")
+                        }
                     }
-
                 }
             }
+
             item {
                 Button(
                     onClick = {
-                        val recipeId = FirebaseDatabase.getInstance()
-                            .getReference("recipes")
-                            .push().key ?: return@Button
-
                         val storageRef = FirebaseStorage.getInstance()
-                            .reference.child("recipes_photos/$recipeId.jpg")
+                            .reference.child("recipes_photos/$recipeID.jpg")
 
+                        // If user selected a new photo: upload it → save URL
                         if (photoUri != null) {
                             storageRef.putFile(photoUri!!)
                                 .addOnSuccessListener {
                                     storageRef.downloadUrl.addOnSuccessListener { downloadUrl ->
 
-                                        val recipeData = mapOf(
-                                            "id" to recipeId,
-                                            "author" to uid,
+                                        val updatedData = mapOf(
                                             "name" to name,
                                             "description" to description,
                                             "ingredients" to ingredients.split(","),
@@ -256,32 +255,35 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                                             "picture" to downloadUrl.toString()
                                         )
 
-                                        FirebaseDatabase.getInstance().getReference("recipes")
-                                            .child(recipeId)
-                                            .setValue(recipeData)
+                                        recipeRef.updateChildren(updatedData)
 
-                                        Toast.makeText(context, "Recipe added!", Toast.LENGTH_SHORT)
-                                            .show()
+                                        Toast.makeText(
+                                            context,
+                                            "Recipe updated!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         navController.popBackStack()
                                     }
                                 }
                         } else {
-                            Toast.makeText(context, "Select an image first!", Toast.LENGTH_SHORT)
-                                .show()
+                            // No new photo → keep old one
+                            val updatedData = mapOf(
+                                "name" to name,
+                                "description" to description,
+                                "ingredients" to ingredients.split(","),
+                                "instructions" to instructions,
+                                "categories" to categories,
+                                "picture" to originalPhotoUrl
+                            )
+
+                            recipeRef.updateChildren(updatedData)
+                            Toast.makeText(context, "Recipe updated!", Toast.LENGTH_SHORT).show()
+                            navController.popBackStack()
                         }
                     },
                     enabled = name.isNotBlank() && description.isNotBlank()
-                ) { Text("Add Recipe") }
+                ) { Text("Save Changes") }
             }
         }
     }
-}
-
-fun saveBitmapToCache(context: Context, bitmap: Bitmap): Uri {
-    val filename = "${System.currentTimeMillis()}.jpg"
-    val stream = context.openFileOutput(filename, Context.MODE_PRIVATE)
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 95, stream)
-    stream.close()
-    val file = File(context.filesDir, filename)
-    return FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
 }
