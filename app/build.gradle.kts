@@ -71,4 +71,6 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.6")
 
     implementation("androidx.datastore:datastore-preferences:1.2.0")
+
+    implementation("com.google.accompanist:accompanist-drawablepainter:0.35.0-alpha")
 }

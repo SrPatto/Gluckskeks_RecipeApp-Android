@@ -71,16 +71,19 @@ fun LoginScreen(navController: NavHostController) {
                 Firebase.auth.signInWithCredential(credential)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            Toast.makeText(context, "Google Sign-In Successful", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Google Sign-In Successful", Toast.LENGTH_SHORT)
+                                .show()
                             navController.navigate(Routes.HOME) { // Navigate to Router
                                 popUpTo(Routes.LOGIN) { inclusive = true }
                             }
                         } else {
-                            Toast.makeText(context, "Google Sign-In Failed", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "Google Sign-In Failed", Toast.LENGTH_SHORT)
+                                .show()
                         }
                     }
             } catch (e: Exception) {
-                Toast.makeText(context, "Google Sign-In Failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Google Sign-In Failed: ${e.message}", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
 
@@ -139,7 +142,11 @@ fun LoginScreen(navController: NavHostController) {
                         Firebase.auth.signInWithEmailAndPassword(email.trim(), password.trim())
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
-                                    Toast.makeText(context, "Sign In Successful", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        context,
+                                        "Sign In Successful",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                     navController.navigate(Routes.HOME) { // Navigate to Router
                                         popUpTo(Routes.LOGIN) { inclusive = true }
                                     }
@@ -185,3 +192,4 @@ fun LoginScreen(navController: NavHostController) {
         }
     }
 }
+

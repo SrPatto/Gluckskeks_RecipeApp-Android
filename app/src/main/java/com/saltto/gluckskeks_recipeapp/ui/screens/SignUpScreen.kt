@@ -2,6 +2,7 @@ package com.saltto.gluckskeks_recipeapp.ui.screens
 
 import android.content.Context
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -24,7 +26,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.navigation.NavHostController
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.saltto.gluckskeks_recipeapp.navigation.Routes
@@ -84,8 +88,12 @@ fun SignUpScreen(navController: NavHostController) {
                                         "Sign Up Successful",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    autoLogin(context, trimmedEmail, trimmedPassword){
-                                        Toast.makeText(context, "Sign In Successful", Toast.LENGTH_SHORT).show()
+                                    autoLogin(context, trimmedEmail, trimmedPassword) {
+                                        Toast.makeText(
+                                            context,
+                                            "Sign In Successful",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         navController.navigate(Routes.HOME) { // Navigate to Router
                                             popUpTo(Routes.SIGNUP) { inclusive = true }
                                         }
@@ -114,6 +122,24 @@ fun SignUpScreen(navController: NavHostController) {
                 Text(text = "Already have an account? Sign In")
             }
         }
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(0.dp),
+        contentAlignment = Alignment.BottomCenter
+    ) {
+        Image(
+//                            painter = painterResource(R.drawable.default_image),
+            painter = rememberDrawablePainter(
+                drawable = getDrawable(
+                    context,
+                    com.saltto.gluckskeks_recipeapp.R.drawable.shougun
+                )
+            ),
+            contentDescription = null,
+            modifier = Modifier.size(200.dp)
+        )
     }
 }
 

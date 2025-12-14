@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -27,9 +28,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.Firebase
@@ -208,12 +211,32 @@ fun ProfileScreen(
 
                 recipeList.isEmpty() -> {
                     item {
-                        Text(
-                            if (selectedIndex == 0)
-                                "You haven't created any recipes yet"
-                            else
-                                "No favorite recipes yet"
-                        )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(4.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                if (selectedIndex == 0)
+                                    "You haven't created any recipes yet"
+                                else
+                                    "No favorite recipes yet"
+                            )
+                            Image(
+//                            painter = painterResource(R.drawable.default_image),
+                                painter = rememberDrawablePainter(
+                                    drawable = getDrawable(
+                                        context,
+                                        com.saltto.gluckskeks_recipeapp.R.drawable.karuko
+                                    )
+                                ),
+                                contentDescription = null,
+                                modifier = Modifier.size(200.dp)
+                            )
+                        }
+
                     }
                 }
 

@@ -47,10 +47,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.storage.FirebaseStorage
@@ -186,7 +188,13 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                         )
                     } else {
                         Image(
-                            painter = painterResource(R.drawable.default_image),
+//                            painter = painterResource(R.drawable.default_image),
+                            painter = rememberDrawablePainter(
+                                drawable = getDrawable(
+                                    context,
+                                    R.drawable.takopis_kamera
+                                )
+                            ),
                             contentDescription = null,
                             modifier = imageModifier
                         )
@@ -212,32 +220,20 @@ fun AddRecipeScreen(navController: NavHostController, modifier: Modifier) {
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
-
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Button(onClick = {
-                                pickPhotoLauncher.launch(
-                                    PickVisualMediaRequest(
-                                        ActivityResultContracts.PickVisualMedia.ImageOnly
-                                    )
-                                )
-                            }) { Text("Choose from Gallery") }
-
-                            Button(
-                                onClick = {
-                                    val uri = createImageUri(context)
-                                    capturedImageUri = uri      // store the URI
-                                    takePhotoLauncher.launch(uri)
-                                },
-                                modifier = Modifier.weight(1f)
-                            ) {
-                                Text(
-                                    "Take Photo",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                            }
-
+                        Button(
+                            onClick = {
+                                val uri = createImageUri(context)
+                                capturedImageUri = uri      // store the URI
+                                takePhotoLauncher.launch(uri)
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(
+                                "Take Photo",
+                                style = MaterialTheme.typography.titleSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            )
                         }
                     }
                 }
