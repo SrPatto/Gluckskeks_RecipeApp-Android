@@ -10,13 +10,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -33,6 +36,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
+import com.saltto.gluckskeks_recipeapp.ui.components.SettingsDropdownMenu
 import com.saltto.gluckskeks_recipeapp.ui.screens.AddRecipeScreen
 import com.saltto.gluckskeks_recipeapp.ui.screens.EditRecipeScreen
 import com.saltto.gluckskeks_recipeapp.ui.screens.HomeScreen
@@ -67,9 +72,10 @@ enum class DestinationNavBar(
 @Composable
 fun AppNavHost(
     navController: NavHostController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startDestination: String
 ) {
-    NavHost(navController, startDestination = Routes.LOGIN) {
+    NavHost(navController, startDestination = startDestination) {
         composable(Routes.LOGIN) { LoginScreen(navController) }
         composable(Routes.SIGNUP) { SignUpScreen(navController) }
         composable(Routes.HOME) { HomeScreen(navController, modifier) }
@@ -88,14 +94,21 @@ fun AppNavHost(
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppNavigation(
     navController: NavHostController = rememberNavController(),
+    isDarkTheme: Boolean,
+    onToggleTheme: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    val startDestination = DestinationNavBar.HOME
-    var selectedDestination by rememberSaveable { mutableIntStateOf(startDestination.ordinal) }
+    val auth = FirebaseAuth.getInstance()
+    val startDestination = if (auth.currentUser != null) {
+        Routes.HOME
+    } else {
+        Routes.LOGIN
+    }
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
@@ -112,15 +125,40 @@ fun AppNavigation(
 
     Scaffold(
         modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            if (currentRoute == Routes.HOME) {
+                TopAppBar(
+                    title = {
+                        Text(
+                            "GLUCKSKEKS",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
+                    actions = {
+                        SettingsDropdownMenu(
+                            isDarkTheme = isDarkTheme,
+                            onThemeChange = onToggleTheme
+                        )
+                    }
+                )
+            }
+        },
         bottomBar = {
             if (!hideBottomBar) {
-                NavigationBar(windowInsets = NavigationBarDefaults.windowInsets) {
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    windowInsets = NavigationBarDefaults.windowInsets
+                ) {
                     DestinationNavBar.entries.forEachIndexed { index, destination ->
                         NavigationBarItem(
-                            selected = selectedDestination == index,
+                            selected = currentRoute == destination.route,
                             onClick = {
-                                navController.navigate(route = destination.route)
-                                selectedDestination = index
+                                navController.navigate(destination.route) {
+                                    popUpTo(Routes.HOME)
+                                    launchSingleTop = true
+                                }
                             },
                             icon = {
                                 Icon(
@@ -128,16 +166,30 @@ fun AppNavigation(
                                     contentDescription = destination.contentDescription
                                 )
                             },
-                            label = { Text(destination.label, style = MaterialTheme.typography.titleSmall) }
+                            label = {
+                                Text(
+                                    destination.label,
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                            )
                         )
                     }
                 }
-            } else {
-//                selectedDestination = startDestination.ordinal
             }
         }
     ) { contentPadding ->
-        AppNavHost(navController, modifier = Modifier.padding(contentPadding))
+        AppNavHost(
+            navController = navController,
+            modifier = Modifier.padding(contentPadding),
+            startDestination = startDestination
+        )
     }
 }
 

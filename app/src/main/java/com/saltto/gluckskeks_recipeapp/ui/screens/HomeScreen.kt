@@ -3,6 +3,7 @@ package com.saltto.gluckskeks_recipeapp.ui.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +28,7 @@ import com.google.firebase.database.ValueEventListener
 import com.saltto.gluckskeks_recipeapp.navigation.Routes
 import com.saltto.gluckskeks_recipeapp.ui.components.RecipeCard
 import com.saltto.gluckskeks_recipeapp.ui.components.ReturnButton
+import com.saltto.gluckskeks_recipeapp.ui.components.SettingsDropdownMenu
 
 @Composable
 fun HomeScreen(
@@ -58,41 +60,28 @@ fun HomeScreen(
         })
     }
 
-    Column(
+    LazyColumn(
         modifier = modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Text("GLUCKSKEKS", style = MaterialTheme.typography.titleLarge)
-        }
-        Spacer(modifier = Modifier.height(4.dp))
+        when {
+            isLoading.value -> {
+                item { Text("Loading recipes...") }
+            }
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp, 0.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            when {
-                isLoading.value -> {
-                    item { Text("Loading recipes...") }
-                }
+            recipeList.isEmpty() -> {
+                item { Text("No recipes yet — upload one!") }
+            }
 
-                recipeList.isEmpty() -> {
-                    item { Text("No recipes yet — upload one!") }
-                }
-
-                else -> {
-                    items(recipeList.size) { index ->
-                        RecipeCard(
-                            recipeID = recipeList[index],
-                            onClickable = { navController.navigate("recipe/${recipeList[index]}") }
-                        )
-                    }
+            else -> {
+                items(recipeList.size) { index ->
+                    RecipeCard(
+                        recipeID = recipeList[index],
+                        onClickable = { navController.navigate("recipe/${recipeList[index]}") }
+                    )
                 }
             }
         }

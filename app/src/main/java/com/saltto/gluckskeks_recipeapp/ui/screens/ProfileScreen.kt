@@ -1,5 +1,6 @@
 package com.saltto.gluckskeks_recipeapp.ui.screens
 
+import android.R
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
@@ -160,6 +161,22 @@ fun ProfileScreen(
                 IconButton(onClick = { showEditDialog = true }) {
                     Icon(Icons.Default.Edit, contentDescription = null)
                 }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    signOut(context) {
+                        Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
+                        navController.navigate(Routes.LOGIN) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(text = "Logout", style = MaterialTheme.typography.titleLarge)
             }
 
             Spacer(Modifier.height(16.dp))
