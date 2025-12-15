@@ -22,7 +22,7 @@ fun FavoriteIconButton(
     IconToggleButton(
         checked = isFavorite,
         onCheckedChange = { onToggle(it) },
-        modifier = modifier.padding(8.dp)
+        modifier = modifier.padding(3.dp)
     ) {
         Icon(
             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,

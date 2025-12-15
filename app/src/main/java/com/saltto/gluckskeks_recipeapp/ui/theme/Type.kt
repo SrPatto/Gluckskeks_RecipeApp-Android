@@ -15,7 +15,7 @@ val MiFuente = FontFamily(
 )
 val AppTypography = Typography(
     headlineMedium = Typography().headlineMedium.copy(fontFamily = MiFuente),
-    bodyLarge = Typography().bodyLarge.copy(fontFamily = MiFuente,fontWeight = FontWeight.Normal, fontSize = 15.sp,lineHeight = 15.sp,),
+    bodyLarge = Typography().bodyLarge.copy(fontFamily = MiFuente,fontWeight = FontWeight.Normal, fontSize = 15.sp,lineHeight = 25.sp,),
     titleLarge = TextStyle(
         fontFamily = MiFuente,
         fontWeight = FontWeight.Bold,

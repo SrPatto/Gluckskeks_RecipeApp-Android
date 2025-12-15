@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -116,7 +117,7 @@ fun RecipeCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding( 6.dp,2.dp, 6.dp, 2.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -141,7 +142,7 @@ fun RecipeCard(
                 }
                 Text(username, modifier = Modifier.padding(12.dp))
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp,0.dp, 8.dp, 2.dp)) {
                 if (isEditable) {
                     RecipeDropdownMenu(
                         recipeID = recipeID,
@@ -192,14 +193,15 @@ fun RecipeCard(
 
         }
 
-        Column(Modifier.padding(5.dp)) {
+        Column(Modifier.padding(6.dp,0.dp, 6.dp, 4.dp)) {
             //Recipe image
             if (!recipeImg.isNullOrEmpty()) {
                 Image(
                     painter = rememberAsyncImagePainter(recipeImg),
                     contentDescription = "Recipe image",
                     modifier = Modifier
-                        .height(140.dp)
+                       // .height(140.dp)
+                        .heightIn(min = 120.dp, max = 300.dp)
                         .fillMaxWidth(),
                     contentScale = ContentScale.Crop
                 )
@@ -208,7 +210,8 @@ fun RecipeCard(
                     painter = painterResource(R.drawable.default_image),
                     contentDescription = null,
                     modifier = Modifier
-                        .height(140.dp)
+                      //  .height(140.dp)
+                        .heightIn(min = 120.dp, max = 300.dp)
                         .fillMaxWidth()
                 )
             }

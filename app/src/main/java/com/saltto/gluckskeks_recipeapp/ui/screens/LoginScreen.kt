@@ -3,6 +3,7 @@ package com.saltto.gluckskeks_recipeapp.ui.screens
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -10,7 +11,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -24,10 +27,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.navigation.NavHostController
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -38,6 +43,8 @@ import com.google.firebase.auth.auth
 import com.saltto.gluckskeks_recipeapp.navigation.Routes
 import com.saltto.gluckskeks_recipeapp.ui.components.DividerWithText
 import com.saltto.gluckskeks_recipeapp.ui.components.ForgotPassword_AlertDialog
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
+
 
 @Composable
 fun LoginScreen(navController: NavHostController) {
@@ -86,16 +93,29 @@ fun LoginScreen(navController: NavHostController) {
                     .show()
             }
         }
-
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp,5.dp,),
         contentAlignment = Alignment.Center
     ) {
+
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = rememberDrawablePainter(
+                    drawable = getDrawable(
+                        context,
+                        com.saltto.gluckskeks_recipeapp.R.drawable.shougun
+                    )),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 200.dp),
+                contentScale = ContentScale.Fit
+            )
+            Spacer(modifier = Modifier.height(12.dp))
             Text(text = "Sign In", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             OutlinedTextField(
                 value = email,
@@ -104,7 +124,7 @@ fun LoginScreen(navController: NavHostController) {
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
                 value = password,

@@ -3,6 +3,7 @@ package com.saltto.gluckskeks_recipeapp.navigation
 import android.app.Application
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -130,10 +131,17 @@ fun AppNavigation(
             if (currentRoute == Routes.HOME) {
                 TopAppBar(
                     title = {
-                        Text(
-                            "GLUCKSKEKS",
-                            style = MaterialTheme.typography.titleLarge
-                        )
+                        Column {
+                            Text(
+                                text = "GLUCKSKEKS",
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = "Descubre tu nueva receta favorita!!!",
+                                style = MaterialTheme.typography.titleSmall
+                            )
+                        }
                     },
                     actions = {
                         SettingsDropdownMenu(

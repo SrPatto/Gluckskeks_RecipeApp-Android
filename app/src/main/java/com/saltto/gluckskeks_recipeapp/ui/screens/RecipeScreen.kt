@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.HorizontalDivider
@@ -178,7 +179,7 @@ fun RecipeScreen(
             ReturnButton {
                 navController.popBackStack()
             }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier.padding(8.dp,0.dp, 8.dp, 2.dp)) {
                 IconButton(onClick = { shareRecipe() }) {
                     Icon(
                         painter = painterResource(R.drawable.share_icon),
@@ -229,7 +230,8 @@ fun RecipeScreen(
                         painter = rememberAsyncImagePainter(recipeImg),
                         contentDescription = "Recipe image",
                         modifier = Modifier
-                            .height(140.dp)
+                            // .height(140.dp)
+                            .heightIn(min = 120.dp, max = 300.dp)
                             .fillMaxWidth(),
                         contentScale = ContentScale.Crop
                     )
@@ -238,8 +240,10 @@ fun RecipeScreen(
                         painter = painterResource(R.drawable.default_image),
                         contentDescription = null,
                         modifier = Modifier
-                            .height(140.dp)
-                            .fillMaxWidth()
+                            // .height(140.dp)
+                            .heightIn(min = 120.dp, max = 300.dp)
+                            .fillMaxWidth(),
+                        contentScale = ContentScale.Crop
                     )
                 }
             }
