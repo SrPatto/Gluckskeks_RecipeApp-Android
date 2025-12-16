@@ -1,15 +1,19 @@
 package com.saltto.gluckskeks_recipeapp.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +26,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +43,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +53,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.getDrawable
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.saltto.gluckskeks_recipeapp.R
 
 @Composable
@@ -54,35 +65,32 @@ fun TagEditItem(
     Row(
         modifier = modifier
             .border(
-                width = 0.5.dp,
-                color = Color.LightGray,
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.outline,
                 shape = CircleShape
             )
             .background(
-                color = Color.White,
+                color = MaterialTheme.colorScheme.surface,
                 shape = CircleShape
             )
-            .padding(
-                horizontal = 12.dp,
-                vertical = 6.dp
-            ),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = text,
-            style = MaterialTheme.typography.titleSmall
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurface
         )
+
         IconButton(
-            onClick = {
-                onRemove(text)
-            },
+            onClick = { onRemove(text) },
             modifier = Modifier.size(18.dp)
         ) {
             Icon(
                 imageVector = Icons.Default.Close,
-                contentDescription = null,
-                tint = Color.DarkGray
+                contentDescription = "Remove tag",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
@@ -98,26 +106,89 @@ fun TagInputField(
     BasicTextField(
         modifier = modifier,
         value = tag,
-        onValueChange = {
-            onValueChange(it)
-        },
+        onValueChange = onValueChange,
         singleLine = true,
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done
-        ),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(
-            onDone = {
-                onDone(tag)
-            }
+            onDone = { onDone(tag) }
         ),
-        textStyle = MaterialTheme.typography.headlineSmall
-    ) {
+        textStyle = MaterialTheme.typography.titleSmall.copy(
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    ) { innerTextField ->
         Box {
-            if (tag.isEmpty())
+            if (tag.isEmpty()) {
                 Text(
-                    text = "Add Tag", style = MaterialTheme.typography.titleSmall
+                    text = "Add tag",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            it.invoke()
+            }
+            innerTextField()
+        }
+    }
+}
+
+@Composable
+fun SuggestedTagsDropdown(
+    allTags: List<String>,
+    selectedTags: List<String>,
+    onTagSelected: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    val visibleTags = allTags.take(4)
+    val hiddenTags = allTags.drop(4)
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+        Text(
+            text = "Suggested tags",
+            style = MaterialTheme.typography.titleSmall
+        )
+
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy((-6).dp)
+        ) {
+            visibleTags.forEach { tag ->
+                AssistChip(
+                    onClick = {
+                        if (tag !in selectedTags) {
+                            onTagSelected(tag)
+                        }
+                    },
+                    enabled = tag !in selectedTags,
+                    label = { Text(tag) }
+                )
+            }
+
+            AssistChip(
+                onClick = { expanded = true },
+                label = { Text("More") },
+                colors = AssistChipDefaults.assistChipColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            )
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            hiddenTags.forEach { tag ->
+                DropdownMenuItem(
+                    text = { Text(tag) },
+                    onClick = {
+                        expanded = false
+                        if (tag !in selectedTags) {
+                            onTagSelected(tag)
+                        }
+                    },
+                    enabled = tag !in selectedTags
+                )
+            }
         }
     }
 }
@@ -130,21 +201,60 @@ fun TagInputUI(
 ) {
     var tag by remember { mutableStateOf("") }
 
+    val defaultTags = remember {
+        mutableStateListOf(
+            "Meat",
+            "Seafood",
+            "Vegetables",
+            "Dairy",
+            "Vegetarian",
+            "Fast food",
+            "Main dish",
+            "Snack",
+            "Breakfast",
+            "Dessert",
+            "Bread / Pastry",
+            "Drink",
+            "Oven",
+            "No cooking",
+            "Very easy",
+            "Gourmet",
+            "Less than 1 hour",
+            "More than 1 hour",
+            "Budget-friendly",
+            "Expensive",
+            "For 1 person",
+            "To share",
+            "Christmas",
+            "Romantic",
+            "Medium difficulty"
+        )
+    }
+
     Column(
         modifier = Modifier
-            .border(1.dp, Color.LightGray, RoundedCornerShape(4.dp))
-            .background(Color.LightGray, RoundedCornerShape(4.dp))
-            .padding(16.dp)
             .fillMaxWidth()
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.outline,
+                RoundedCornerShape(8.dp)
+            )
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant,
+                RoundedCornerShape(8.dp)
+            )
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+
         FlowRow(
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             tags.forEach { item ->
                 TagEditItem(
                     text = item,
-                    onRemove = { onRemoveTag(item) }
+                    onRemove = onRemoveTag
                 )
             }
 
@@ -157,6 +267,12 @@ fun TagInputUI(
                 }
             )
         }
+
+        SuggestedTagsDropdown(
+            allTags = defaultTags,
+            selectedTags = tags,
+            onTagSelected = onAddTag
+        )
     }
 }
 
@@ -165,35 +281,39 @@ fun TagItem(
     modifier: Modifier = Modifier,
     text: String,
 ) {
+    val context = LocalContext.current
+
     Row(
         modifier = modifier
             .border(
-                width = 0.5.dp,
-                color = Color.LightGray,
-                shape = CircleShape
+                1.dp,
+                MaterialTheme.colorScheme.outline,
+                CircleShape
             )
             .background(
-                color = Color.White,
-                shape = CircleShape
+                MaterialTheme.colorScheme.surface,
+                CircleShape
             )
-            .padding(
-                horizontal = 12.dp,
-                vertical = 6.dp
-            ),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(
-            imageVector = Icons.Default.KeyboardArrowRight,
+        Image(
+            painter = rememberDrawablePainter(
+                drawable = getDrawable(
+                    context,
+                    com.saltto.gluckskeks_recipeapp.R.drawable.tag
+                )
+            ),
             contentDescription = null,
-            tint = Color.Black
+            modifier = Modifier.size(20.dp),
+            contentScale = ContentScale.Fit
         )
 
         Text(
             text = text,
             style = MaterialTheme.typography.titleSmall,
-            color = Color.Black
-
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }
@@ -202,26 +322,27 @@ fun TagItem(
 fun TagCardUI(
     tags: List<String>
 ) {
-    var tag by remember { mutableStateOf("") }
-
     Column(
         modifier = Modifier
-            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
-            .background(Color.DarkGray, RoundedCornerShape(8.dp))
-            .padding(16.dp)
             .fillMaxWidth()
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.outline,
+                RoundedCornerShape(8.dp)
+            )
+            .background(
+                Color(0x00DB1A6A),
+                RoundedCornerShape(8.dp)
+            )
+            .padding(16.dp)
     ) {
         FlowRow(
-            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             tags.forEach { item ->
-                TagItem(
-                    text = item,
-                )
+                TagItem(text = item)
             }
         }
-
-
     }
 }

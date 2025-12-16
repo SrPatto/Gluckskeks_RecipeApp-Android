@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.res.painterResource
@@ -114,122 +115,153 @@ fun RecipeCard(
             .clickable { onClickable() },
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding( 6.dp,2.dp, 6.dp, 2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp)) {
-                if (!userPhoto.isNullOrEmpty()) {
-                    Image(
-                        painter = rememberAsyncImagePainter(userPhoto),
-                        contentDescription = "User image",
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape),
-                        contentScale = ContentScale.Crop
-                    )
-                } else {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                    )
-                }
-                Text(username, modifier = Modifier.padding(12.dp))
-            }
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(8.dp,0.dp, 8.dp, 2.dp)) {
-                if (isEditable) {
-                    RecipeDropdownMenu(
-                        recipeID = recipeID,
-                        onDelete = { id ->
+        Box {
+            Image(
+                painter = painterResource(R.drawable.container),
+                contentDescription = null,
+                modifier = Modifier
+                    .matchParentSize(),
+                contentScale = ContentScale.FillBounds
+            )
 
-                            val db = FirebaseDatabase.getInstance().reference
-
-                            db.child("recipes")
-                                .child(id)
-                                .removeValue()
-
-                            db.child("favorites")
-                                .get()
-                                .addOnSuccessListener { snapshot ->
-                                    snapshot.children.forEach { userNode ->
-                                        userNode.child(id).ref.removeValue()
-                                    }
-                                }
-                        },
-                        onEdit = { id ->
-                            onEditClick(id)
-                        }
-                    )
-                }
-                FavoriteIconButton(
-                    isFavorite = isFavorite,
-                    onToggle = { newValue ->
-                        if (uid == null) return@FavoriteIconButton
-
-                        if (newValue) {
-                            FirebaseDatabase.getInstance()
-                                .getReference("favorites")
-                                .child(uid)
-                                .child(recipeID)
-                                .setValue(true)
-                        } else {
-                            FirebaseDatabase.getInstance()
-                                .getReference("favorites")
-                                .child(uid)
-                                .child(recipeID)
-                                .removeValue()
-                        }
-
-                        isFavorite = newValue
-                    }
-                )
-            }
-
-        }
-
-        Column(Modifier.padding(6.dp,0.dp, 6.dp, 4.dp)) {
-            //Recipe image
-            if (!recipeImg.isNullOrEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(recipeImg),
-                    contentDescription = "Recipe image",
+            Column {
+                Row(
                     modifier = Modifier
-                       // .height(140.dp)
-                        .heightIn(min = 120.dp, max = 300.dp)
-                        .fillMaxWidth(),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Image(
-                    painter = painterResource(R.drawable.default_image),
-                    contentDescription = null,
-                    modifier = Modifier
-                      //  .height(140.dp)
-                        .heightIn(min = 120.dp, max = 300.dp)
                         .fillMaxWidth()
-                )
+                        .padding(6.dp, 2.dp, 6.dp, 2.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        if (!userPhoto.isNullOrEmpty()) {
+                            Image(
+                                painter = rememberAsyncImagePainter(userPhoto),
+                                contentDescription = "User image",
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.Person,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape),
+                                tint = Color(0xFF000000)
+                            )
+                        }
+                        Text(
+                            username,
+                            modifier = Modifier.padding(12.dp),
+                            color = Color(0xFF000000)
+                        )
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(8.dp, 0.dp, 8.dp, 2.dp)
+                    ) {
+                        if (isEditable) {
+                            RecipeDropdownMenu(
+                                recipeID = recipeID,
+                                onDelete = { id ->
+
+                                    val db = FirebaseDatabase.getInstance().reference
+
+                                    db.child("recipes")
+                                        .child(id)
+                                        .removeValue()
+
+                                    db.child("favorites")
+                                        .get()
+                                        .addOnSuccessListener { snapshot ->
+                                            snapshot.children.forEach { userNode ->
+                                                userNode.child(id).ref.removeValue()
+                                            }
+                                        }
+                                },
+                                onEdit = { id ->
+                                    onEditClick(id)
+                                }
+                            )
+                        }
+                        FavoriteIconButton(
+                            isFavorite = isFavorite,
+                            onToggle = { newValue ->
+                                if (uid == null) return@FavoriteIconButton
+
+                                if (newValue) {
+                                    FirebaseDatabase.getInstance()
+                                        .getReference("favorites")
+                                        .child(uid)
+                                        .child(recipeID)
+                                        .setValue(true)
+                                } else {
+                                    FirebaseDatabase.getInstance()
+                                        .getReference("favorites")
+                                        .child(uid)
+                                        .child(recipeID)
+                                        .removeValue()
+                                }
+
+                                isFavorite = newValue
+                            }
+                        )
+                    }
+
+                }
+
+                Column(Modifier.padding(6.dp, 0.dp, 6.dp, 4.dp)) {
+                    //Recipe image
+                    if (!recipeImg.isNullOrEmpty()) {
+                        Image(
+                            painter = rememberAsyncImagePainter(recipeImg),
+                            contentDescription = "Recipe image",
+                            modifier = Modifier
+                                // .height(140.dp)
+                                .heightIn(min = 120.dp, max = 300.dp)
+                                .fillMaxWidth(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Image(
+                            painter = painterResource(R.drawable.default_image),
+                            contentDescription = null,
+                            modifier = Modifier
+                                //  .height(140.dp)
+                                .heightIn(min = 120.dp, max = 300.dp)
+                                .fillMaxWidth(),
+                        )
+                    }
+
+                    Text(
+                        recipeName,
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp),
+                        color = Color(0xFF000000)
+                    )
+                    Text(
+                        recipeDescription,
+                        maxLines = 3,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp),
+                        color = Color(0xFF000000)
+                    )
+
+                    Box(modifier = Modifier.padding(5.dp, 8.dp, 8.dp, 8.dp)) {
+                        TagCardUI(
+                            recipeCategories
+                        )
+                    }
+                }
             }
-
-            Text(
-                recipeName,
-                style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
-            )
-            Text(
-                recipeDescription,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp)
-            )
-
-            Box(modifier = Modifier.padding(5.dp, 8.dp, 8.dp, 8.dp)) { TagCardUI(recipeCategories) }
         }
+
     }
+
 }

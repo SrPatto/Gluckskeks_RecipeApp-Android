@@ -2,11 +2,13 @@ package com.saltto.gluckskeks_recipeapp.navigation
 
 import android.app.Application
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Home
@@ -28,8 +30,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat.getDrawable
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.ActivityNavigator
 import androidx.navigation.NavHostController
@@ -37,6 +41,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.saltto.gluckskeks_recipeapp.ui.components.SettingsDropdownMenu
 import com.saltto.gluckskeks_recipeapp.ui.screens.AddRecipeScreen
@@ -126,28 +131,46 @@ fun AppNavigation(
 
     Scaffold(
         modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.background,
+//        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            if (currentRoute == Routes.HOME) {
+            if (currentRoute == Routes.HOME || currentRoute == Routes.PROFILE) {
                 TopAppBar(
                     title = {
                         Column {
                             Text(
-                                text = "GLUCKSKEKS",
+                                text = if (currentRoute == Routes.HOME) "GLUCKSKEKS" else "PROFILE",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Text(
-                                text = "Descubre tu nueva receta favorita!!!",
-                                style = MaterialTheme.typography.titleSmall
-                            )
+                            if (currentRoute == Routes.HOME) {
+                                Text(
+                                    text = "Find new recipes!!!",
+                                    style = MaterialTheme.typography.titleSmall
+                                )
+                            }
                         }
                     },
                     actions = {
-                        SettingsDropdownMenu(
-                            isDarkTheme = isDarkTheme,
-                            onThemeChange = onToggleTheme
-                        )
+                        if (currentRoute == Routes.PROFILE) {
+                            SettingsDropdownMenu(
+                                isDarkTheme = isDarkTheme,
+                                onThemeChange = onToggleTheme
+                            )
+                        } else {
+                            Image(
+                                painter = rememberDrawablePainter(
+                                    drawable = getDrawable(
+                                        context,
+                                        com.saltto.gluckskeks_recipeapp.R.drawable.galleta_suertuda
+                                    )
+                                ),
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .size(56.dp)
+                                    .padding(8.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
                     }
                 )
             }

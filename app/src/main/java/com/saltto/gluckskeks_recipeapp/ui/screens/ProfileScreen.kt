@@ -1,13 +1,15 @@
 package com.saltto.gluckskeks_recipeapp.ui.screens
 
-import android.R
 import android.content.Context
 import android.net.Uri
 import android.widget.Toast
 import android.widget.ToggleButton
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -27,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.navigation.NavHostController
@@ -45,8 +49,10 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.storage.FirebaseStorage
 import com.saltto.gluckskeks_recipeapp.navigation.Routes
 import com.saltto.gluckskeks_recipeapp.ui.components.RecipeCard
+import com.saltto.gluckskeks_recipeapp.R
 import kotlinx.coroutines.launch
 import kotlin.toString
+
 
 @Composable
 fun ProfileScreen(
@@ -93,6 +99,10 @@ fun ProfileScreen(
         .size(140.dp)
         .clip(CircleShape)
         .clickable { imagePicker.launch("image/*") }
+        .border(
+            border = BorderStroke(2.dp, color = MaterialTheme.colorScheme.inverseSurface),
+            CircleShape
+        )
 
     // LOAD USER INFO
     LaunchedEffect(uid) {
@@ -119,90 +129,97 @@ fun ProfileScreen(
     }
 
     val listState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
-    val showScrollToTop by remember {
-        derivedStateOf { listState.firstVisibleItemIndex > 0 }
-    }
 
     // UI
     Box(
         modifier = modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .padding(20.dp),
+        contentAlignment = Alignment.TopCenter
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
 
-            Text("Profile", style = MaterialTheme.typography.titleLarge)
-            Spacer(Modifier.height(20.dp))
-
-            if (!photoUrl.isNullOrEmpty()) {
-                Image(
-                    painter = rememberAsyncImagePainter(photoUrl),
-                    contentDescription = null,
-                    modifier = imageModifier,
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(imageModifier, contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(90.dp)
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(12.dp))
-
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(username)
-                IconButton(onClick = { showEditDialog = true }) {
-                    Icon(Icons.Default.Edit, contentDescription = null)
-                }
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            Button(
-                onClick = {
-                    signOut(context) {
-                        Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
-                        navController.navigate(Routes.LOGIN) {
-                            popUpTo(0) { inclusive = true }
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = "Logout", style = MaterialTheme.typography.titleLarge)
-            }
-
-            Spacer(Modifier.height(16.dp))
-
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                options.forEachIndexed { index, label ->
-                    SegmentedButton(
-                        selected = selectedIndex == index,
-                        onClick = { selectedIndex = index },
-                        label = { Text(label) },
-                        shape = SegmentedButtonDefaults.itemShape(index, options.size)
-                    )
-                }
-            }
-        }
 
         LazyColumn(
             state = listState,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(top = 380.dp), // adjust to header height
+                .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.TopCenter),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+
+                    ) {
+                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Image(
+                            painter = painterResource(R.drawable.comida_mini),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = ContentScale.FillWidth,
+                        )
+                        if (!photoUrl.isNullOrEmpty()) {
+                            Image(
+                                painter = rememberAsyncImagePainter(photoUrl),
+                                contentDescription = null,
+                                modifier = imageModifier,
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Box(imageModifier, contentAlignment = Alignment.Center) {
+                                Icon(
+                                    Icons.Default.Person,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(90.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Row(
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(text = username, style = MaterialTheme.typography.headlineMedium)
+                        IconButton(onClick = { showEditDialog = true }) {
+                            Icon(Icons.Default.Edit, contentDescription = null)
+                        }
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    Button(
+                        onClick = {
+                            signOut(context) {
+                                Toast.makeText(context, "Logged out", Toast.LENGTH_SHORT).show()
+                                navController.navigate(Routes.LOGIN) {
+                                    popUpTo(0) { inclusive = true }
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(text = "Logout", style = MaterialTheme.typography.titleLarge)
+                    }
+
+                    Spacer(Modifier.height(16.dp))
+
+                    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                        options.forEachIndexed { index, label ->
+                            SegmentedButton(
+                                selected = selectedIndex == index,
+                                onClick = { selectedIndex = index },
+                                label = { Text(label) },
+                                shape = SegmentedButtonDefaults.itemShape(index, options.size)
+                            )
+                        }
+                    }
+                }
+            }
+
 
             when {
                 isLoading -> {
@@ -254,22 +271,6 @@ fun ProfileScreen(
             }
         }
     }
-
-    if (showScrollToTop) {
-        FloatingActionButton(
-            onClick = {
-                coroutineScope.launch {
-                    listState.animateScrollToItem(0)
-                }
-            },
-            modifier = Modifier
-//                .align(Alignment.BottomEnd)
-                .padding(16.dp),
-        ) {
-            Icon(Icons.Default.KeyboardArrowUp, contentDescription = "Back to top")
-        }
-    }
-
     // EDIT USERNAME DIALOG
     if (showEditDialog) {
         var newName by remember { mutableStateOf(username) }

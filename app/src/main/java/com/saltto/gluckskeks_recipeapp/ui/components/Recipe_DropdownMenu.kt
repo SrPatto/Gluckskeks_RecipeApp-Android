@@ -19,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.InspectableModifier
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
@@ -38,7 +39,7 @@ fun RecipeDropdownMenu(
         contentAlignment = Alignment.CenterEnd
     ) {
         IconButton(onClick = { expanded = !expanded }) {
-            Icon(Icons.Default.MoreVert, contentDescription = "Options")
+            Icon(Icons.Default.MoreVert, contentDescription = "Options", tint = Color(0xFF000000))
         }
         DropdownMenu(
             expanded = expanded,

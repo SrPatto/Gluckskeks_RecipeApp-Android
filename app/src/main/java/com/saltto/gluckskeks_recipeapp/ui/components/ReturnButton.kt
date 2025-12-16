@@ -35,7 +35,7 @@ fun ReturnButton(onReturn: () -> Unit) {
             modifier = Modifier
                 .border(
                     width = 0.5.dp,
-                    color = Color.LightGray,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 1f),
                     shape = CircleShape
                 )
                 .padding(
@@ -48,7 +48,6 @@ fun ReturnButton(onReturn: () -> Unit) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = null,
-                tint = Color.DarkGray
             )
             Text(
                 text = "Return",

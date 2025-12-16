@@ -11,6 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -22,11 +23,12 @@ fun FavoriteIconButton(
     IconToggleButton(
         checked = isFavorite,
         onCheckedChange = { onToggle(it) },
-        modifier = modifier.padding(3.dp)
+        modifier = modifier.padding(3.dp),
     ) {
         Icon(
             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-            contentDescription = "Mark as Favorite"
+            contentDescription = "Mark as Favorite",
+            tint = if (isFavorite) Color(0xFFB20053) else Color(0xFFDB1A6A)
         )
     }
 }
